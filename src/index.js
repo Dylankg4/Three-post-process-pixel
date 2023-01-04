@@ -16,6 +16,7 @@ import {
     import{ RenderPixelatedPass } from "three/examples/jsm/postprocessing/RenderPixelatedPass.js"
     import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js"
     
+    import { GUI } from "dat.gui";
 
     import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 
@@ -24,17 +25,20 @@ import {
     //Setup Functions
     const clock = new Clock()
     const scene = new Scene()
-    scene.background = new Color('gray')
+    scene.background = new Color(0x151729)
     //const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, .1, 200)
     const aspect = window.innerWidth / window.innerHeight
     const camera = new OrthographicCamera(-aspect, aspect, 1, -1, .1, 100)
 
+    const gui = new GUI()
+
+    /* Not currently being used
     const depthTexture = new DepthTexture()
     const renderTarget = new WebGL3DRenderTarget( window.innerWidth, window.innerHeight, {
         depthTexture: depthTexture,
         depthBuffer: true,
     }
-    )
+    ) */
     
 
     //Renderer ***
@@ -48,15 +52,15 @@ import {
     const composer =  new EffectComposer(renderer)
 
     const renderPass = new RenderPixelatedPass(3, scene, camera )
-    renderPass.normalEdgeStrength = .5
-    renderPass.depthEdgeStrength = 1
+    renderPass.normalEdgeStrength = .1
+    renderPass.depthEdgeStrength = .1
     //Normal non pixelated renderpass
     //const renderPass = new RenderPass( scene, camera )
 
     composer.addPass(renderPass)
 
 
-    //Orbit controls. Not neccesary to use elsewhere in code.
+    //Orbit controls. Once initilaized it is not necessary to use elsewhere in code.
     const controls = new OrbitControls(camera, renderer.domElement)
 
     const container = document.getElementById('scene-container')
@@ -77,6 +81,10 @@ import {
     let amount = 0
     let moved = false
 
+
+    gui.add(renderPass, 'normalEdgeStrength', .1, 1, .05).name("Normal")
+    gui.add(renderPass, 'depthEdgeStrength', .1, 2, .05).name("Depth")
+
     //List of things that will update during animation
     function updateables(delta){
         const move = delta * .3
@@ -95,6 +103,16 @@ import {
         if(amount <= 0) moved = false
         if(amount >= 1) moved = true
     }
+
+    window.addEventListener('resize', () => {
+        renderer.setSize(window.innerWidth, window.innerHeight)
+        renderer.setPixelRatio(window.devicePixelRatio)
+
+        /*camera.left(-aspect)
+        camera.right(aspect)
+        camera.top(1)
+        camera.bottom(-1)*/
+    })
 
     function animate(){
         requestAnimationFrame(animate)
